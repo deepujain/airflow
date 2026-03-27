@@ -35,8 +35,7 @@ from aiohttp import ClientResponseError
 from lockfile.pidlockfile import remove_existing_pidfile
 
 from airflow import __version__ as airflow_version
-from airflow.configuration import conf
-from airflow.providers.common.compat.sdk import timezone
+from airflow.providers.common.compat.sdk import conf, timezone
 from airflow.providers.edge3 import __version__ as edge_provider_version
 from airflow.providers.edge3.cli.api_client import (
     jobs_fetch,
@@ -82,10 +81,10 @@ def _edge_hostname() -> str:
 @cache
 def _execution_api_server_url() -> str:
     """Get the execution api server url from config or environment."""
-    api_url = conf.get("edge", "api_url")
     execution_api_server_url = conf.get("core", "execution_api_server_url", fallback="")
-    if not execution_api_server_url and api_url:
+    if not execution_api_server_url:
         # Derive execution api url from edge api url as fallback
+        api_url = conf.get("edge", "api_url")
         execution_api_server_url = api_url.replace("edge_worker/v1/rpcapi", "execution")
     logger.info("Using execution api server url: %s", execution_api_server_url)
     return execution_api_server_url
